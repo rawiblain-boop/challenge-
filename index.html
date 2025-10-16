@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A7 Challenge Bot - لوحة التحكم</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.4); }
+        }
+
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-container {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            text-align: center;
+            min-width: 400px;
+        }
+
+        .login-header h1 {
+            color: #FFD700;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header p {
+            color: rgba(255, 215, 0, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.5);
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #1a1a1a;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.6);
+            animation: none;
+        }
+
+        .login-error {
+            color: #ff4444;
+            font-weight: 600;
+            margin-top: 15px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .form-section, .command-section {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 20px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-section::before, .command-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .form-section:hover::before, .command-section:hover::before {
+            left: 100%;
+        }
+
+        .form-section:hover, .command-section:hover {
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.4),
+                0 0 40px rgba(255, 215, 0, 0.2),
+                inset 0 1px 0 rgba(255, 215, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .form-section h3, .command-section h4 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .command-section h4 {
+            margin-bottom: 15px;
+        }
+
+        .command-section p {
+            color: rgba(255, 215, 0, 0.8);
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #FFD700;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.5);
+            color: #FFD700;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 215, 0, 0.6);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            animation: glow 3s ease-in-out infinite;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.6);
+            animation: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #FFD700;
+            border: 2px solid #FFD700;
+            font-weight: 600;
+        }
+
+        .btn-outline:hover {
+            background: #FFD700;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .buttons-row {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .preview-section {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+        }
+
+        .preview-section h4 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+
+        .preview-content {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .login-container {
+                min-width: 90%;
+                margin: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .buttons-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- شاشة حماية كلمة المرور -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🔒 A7 Challenge Bot</h1>
+                <p>أدخل كلمة المرور للوصول</p>
+            </div>
+            <div class="login-form">
+                <input type="password" id="passwordInput" placeholder="كلمة المرور" maxlength="10">
+                <button onclick="checkPassword()" class="login-btn">دخول</button>
+                <div id="loginError" class="login-error hidden">كلمة المرور غير صحيحة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div id="mainContent" class="container hidden">
+        <div class="header">
+            <h1>⚔️ A7 Challenge Bot</h1>
+            <p>لوحة التحكم المتقدمة لإدارة التحديات</p>
+        </div>
+
+        <!-- قسم إنشاء الإعلان -->
+        <div class="form-section">
+            <h3>📢 إنشاء إعلان جديد</h3>
+            <form id="announcementForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="server">🖥️ السيرفر:</label>
+                        <input type="text" id="server" name="server" placeholder="مثال: Server 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="map">🗺️ الخريطة:</label>
+                        <input type="text" id="map" name="map" placeholder="مثال: Al Basrah" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="layer">📍 Layer:</label>
+                        <input type="text" id="layer" name="layer" placeholder="مثال: AAS v1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">⏰ الوقت:</label>
+                        <input type="text" id="time" name="time" placeholder="مثال: 21:00 Iraq Time" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="team1_name">🛡️ الفريق الأول:</label>
+                        <select id="team1_name" name="team1_name" required>
+                            <option value="">اختر الجيش</option>
+                            <option value="RUSSIA">RUSSIA</option>
+                            <option value="USA">USA</option>
+                            <option value="WAGNER">WAGNER</option>
+                            <option value="HAMAS">HAMAS</option>
+                            <option value="HZB">HZB</option>
+                            <option value="MARINES">MARINES</option>
+                            <option value="MARINZ">MARINZ</option>
+                            <option value="USMC">USMC</option>
+                            <option value="USSF">USSF</option>
+                            <option value="BRITISH">BRITISH</option>
+                            <option value="IDF">IDF</option>
+                            <option value="CANADA">CANADA</option>
+                            <option value="FRANCE">FRANCE</option>
+                            <option value="INSURGENTS">INSURGENTS</option>
+                            <option value="TALIBAN">TALIBAN</option>
+                            <option value="KONNI GROUP">KONNI GROUP</option>
+                            <option value="VALKYRIE">VALKYRIE</option>
+                            <option value="UKRAINE">UKRAINE</option>
+                            <option value="IRAQ">IRAQ</option>
+                            <option value="SYRIA">SYRIA</option>
+                            <option value="FINLAND">FINLAND</option>
+                            <option value="TURKEY">TURKEY</option>
+                            <option value="SHADOW COMPANY">SHADOW COMPANY</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="team2_name">⚔️ الفريق الثاني:</label>
+                        <select id="team2_name" name="team2_name" required>
+                            <option value="">اختر الجيش</option>
+                            <option value="RUSSIA">RUSSIA</option>
+                            <option value="USA">USA</option>
+                            <option value="WAGNER">WAGNER</option>
+                            <option value="HAMAS">HAMAS</option>
+                            <option value="HZB">HZB</option>
+                            <option value="MARINES">MARINES</option>
+                            <option value="MARINZ">MARINZ</option>
+                            <option value="USMC">USMC</option>
+                            <option value="USSF">USSF</option>
+                            <option value="BRITISH">BRITISH</option>
+                            <option value="IDF">IDF</option>
+                            <option value="CANADA">CANADA</option>
+                            <option value="FRANCE">FRANCE</option>
+                            <option value="INSURGENTS">INSURGENTS</option>
+                            <option value="TALIBAN">TALIBAN</option>
+                            <option value="KONNI GROUP">KONNI GROUP</option>
+                            <option value="VALKYRIE">VALKYRIE</option>
+                            <option value="UKRAINE">UKRAINE</option>
+                            <option value="IRAQ">IRAQ</option>
+                            <option value="SYRIA">SYRIA</option>
+                            <option value="FINLAND">FINLAND</option>
+                            <option value="TURKEY">TURKEY</option>
+                            <option value="SHADOW COMPANY">SHADOW COMPANY</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="commander1">👑 قائد الفريق الأول:</label>
+                        <input type="text" id="commander1" name="commander1" placeholder="اسم القائد">
+                    </div>
+                    <div class="form-group">
+                        <label for="commander2">👑 قائد الفريق الثاني:</label>
+                        <input type="text" id="commander2" name="commander2" placeholder="اسم القائد">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="factions">⚔️ Factions:</label>
+                    <input type="text" id="factions" name="factions" placeholder="مثال: Conventional vs Insurgency">
+                </div>
+
+                <div class="buttons-row">
+                    <button type="button" class="btn btn-outline" onclick="previewAnnouncement()">👁️ معاينة</button>
+                    <button type="submit" class="btn btn-primary">🚀 نشر الإعلان</button>
+                </div>
+            </form>
+
+            <!-- قسم المعاينة -->
+            <div id="previewSection" class="preview-section hidden">
+                <h4>👁️ معاينة الإعلان</h4>
+                <div id="previewContent" class="preview-content"></div>
+            </div>
+        </div>
+
+        <!-- قسم إعادة تفعيل الأزرار -->
+        <div class="command-section">
+            <h4>🔄 إعادة تفعيل الأزرار</h4>
+            <p>إعادة تفعيل أزرار آخر إعلان تم نشره</p>
+            <button type="button" class="btn btn-primary" onclick="reactivateButtons()">🔄 إعادة تفعيل</button>
+        </div>
+
+        <!-- قسم تعيين الفائز -->
+        <div class="command-section">
+            <h4>🏆 تعيين الفائز</h4>
+            <p>تعيين الفائز في تحد معين</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="messageId">🆔 Message ID:</label>
+                    <input type="text" id="messageId" name="messageId" placeholder="معرف الرسالة (Message ID)" required>
+                    <small style="color: rgba(255, 215, 0, 0.6); font-size: 0.8rem;">انقر بزر الماوس الأيمن على الرسالة واختر "Copy Message Link"</small>
+                </div>
+                <div class="form-group">
+                    <label for="winnerName">🏆 اسم الفائز:</label>
+                    <input type="text" id="winnerName" name="winnerName" placeholder="اكتب اسم الفائز" required>
+                    <small style="color: rgba(255, 215, 0, 0.6); font-size: 0.8rem;">يمكنك كتابة أي اسم مثل "الفريق الأول" أو "Team Alpha"</small>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="setWinner()">🏆 تعيين الفائز</button>
+        </div>
+
+        <!-- قسم تعديل الإعلان -->
+        <div class="command-section">
+            <h4>✏️ تعديل الإعلان</h4>
+            <p>تعديل آخر إعلان تم نشره</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit_field">الحقل المراد تعديله:</label>
+                    <select id="edit_field" name="edit_field">
+                        <option value="time">الوقت</option>
+                        <option value="server">السيرفر</option>
+                        <option value="map">الخريطة</option>
+                        <option value="layer">Layer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_value">القيمة الجديدة:</label>
+                    <input type="text" id="edit_value" name="edit_value" placeholder="القيمة الجديدة">
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="editAnnouncement()">✏️ تعديل</button>
+        </div>
+
+        <!-- رسائل الحالة -->
+        <div id="messageContainer"></div>
+    </div>
+
+    <script>
+        // كلمة المرور المطلوبة
+        const REQUIRED_PASSWORD = 'AL7UKOMA';
+        
+        // إعدادات API - Vercel (مجاني)
+        const API_BASE_URL = 'https://your-project.vercel.app'; // سيتم تحديثه بعد النشر
+        
+        // دالة التحقق من كلمة المرور
+        function checkPassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const loginError = document.getElementById('loginError');
+            const loginScreen = document.getElementById('loginScreen');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (passwordInput.value === REQUIRED_PASSWORD) {
+                loginScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+            } else {
+                loginError.classList.remove('hidden');
+                passwordInput.value = '';
+                passwordInput.focus();
+                
+                setTimeout(() => {
+                    loginError.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // السماح بالدخول عند الضغط على Enter
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+        
+        // دالة عرض الرسائل
+        function showMessage(message, type = 'success') {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            container.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // دالة معاينة الإعلان
+        function previewAnnouncement() {
+            const formData = new FormData(document.getElementById('announcementForm'));
+            const data = {
+                server: formData.get('server'),
+                map: formData.get('map'),
+                layer: formData.get('layer'),
+                time: formData.get('time'),
+                team1_name: formData.get('team1_name'),
+                team2_name: formData.get('team2_name'),
+                commander1: formData.get('commander1'),
+                commander2: formData.get('commander2'),
+                factions: formData.get('factions')
+            };
+
+            const previewHTML = `
+                <div style="background: #2c2f33; color: white; padding: 20px; border-radius: 10px; font-family: 'Segoe UI', sans-serif;">
+                    <h3 style="color: #7289da; margin-bottom: 15px;">⚔️ MATCH ANNOUNCEMENT ⚔️</h3>
+                    <p style="margin-bottom: 15px;"><strong>NEW CHALLENGE STARTING</strong></p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div><strong>🖥️ Server:</strong> ${data.server}</div>
+                        <div><strong>🗺️ Map:</strong> ${data.map}</div>
+                        <div><strong>📍 Layer:</strong> ${data.layer}</div>
+                        <div><strong>⏰ Time:</strong> ${data.time}</div>
+                        <div><strong>⚔️ Factions:</strong> ${data.factions || 'TBD'}</div>
+                    </div>
+                    <div style="border-top: 1px solid #7289da; padding-top: 10px;">
+                        <strong>👑 Commanders:</strong><br>
+                        <strong>${data.team1_name}:</strong> ${data.commander1 || 'TBD'}<br>
+                        <strong>${data.team2_name}:</strong> ${data.commander2 || 'TBD'}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('previewContent').innerHTML = previewHTML;
+            document.getElementById('previewSection').classList.remove('hidden');
+        }
+
+        // دالة إرسال الإعلان
+        document.getElementById('announcementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                server: formData.get('server'),
+                map: formData.get('map'),
+                layer: formData.get('layer'),
+                time: formData.get('time'),
+                team1_name: formData.get('team1_name'),
+                team2_name: formData.get('team2_name'),
+                commander1: formData.get('commander1'),
+                commander2: formData.get('commander2'),
+                factions: formData.get('factions')
+            };
+
+            // إنشاء embed للإعلان
+            const embed = {
+                title: "📢 Match Announcement",
+                color: 0x7289DA,
+                fields: [
+                    { name: "Server", value: `\`${data.server}\``, inline: false },
+                    { name: "Map", value: `\`${data.map}\``, inline: false },
+                    { name: "Layer", value: `\`${data.layer}\``, inline: false },
+                    { name: "Factions", value: `\`${data.factions || 'TBD'}\``, inline: false },
+                    { name: "Time", value: `\`${data.time}\``, inline: false },
+                    { name: `${getTeamFlag(data.team1_name)} ${data.team1_name}`, value: 'No members yet', inline: true },
+                    { name: `${getTeamFlag(data.team2_name)} ${data.team2_name}`, value: 'No members yet', inline: true }
+                ],
+                image: {
+                    url: 'https://cdn.discordapp.com/attachments/1408681719347023942/1427956738082213929/gif2-ezgif.com-optimize.gif?ex=68f0bfd8&is=68ef6e58&hm=5df9686f2fb88bb880a879931a96da2d248ceacbe164d2175f9f056ae52e856f&'
+                }
+            };
+
+            // إضافة معلومات القادة إذا كانت متوفرة
+            if (data.commander1 || data.commander2) {
+                embed.fields.push({
+                    name: "Commanders",
+                    value: `**${data.team1_name}:** ${data.commander1 || 'TBD'}\n**${data.team2_name}:** ${data.commander2 || 'TBD'}`,
+                    inline: false
+                });
+            }
+
+            try {
+                const response = await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed],
+                        components: [
+                            {
+                                type: 1,
+                                components: [
+                                    {
+                                        type: 2,
+                                        style: 2,
+                                        label: data.commander1 || 'TBD',
+                                        custom_id: 'commander1_display',
+                                        disabled: true
+                                    },
+                                    {
+                                        type: 2,
+                                        style: 2,
+                                        label: data.commander2 || 'TBD',
+                                        custom_id: 'commander2_display',
+                                        disabled: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 1,
+                                components: [
+                                    {
+                                        type: 2,
+                                        style: 1,
+                                        label: 'Join Team 1',
+                                        custom_id: 'join_team1'
+                                    },
+                                    {
+                                        type: 2,
+                                        style: 4,
+                                        label: 'Join Team 2',
+                                        custom_id: 'join_team2'
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('✅ تم نشر الإعلان بنجاح!', 'success');
+                    e.target.reset();
+                    document.getElementById('previewSection').classList.add('hidden');
+                } else {
+                    showMessage('❌ خطأ في إرسال الإعلان', 'error');
+                }
+            } catch (error) {
+                showMessage('❌ خطأ في الاتصال', 'error');
+                console.error('Error:', error);
+            }
+        });
+
+        // دالة للحصول على علم الفريق
+        function getTeamFlag(teamName) {
+            const flags = {
+                'RUSSIA': '🇷🇺',
+                'USA': '🇺🇸',
+                'WAGNER': '⚔️',
+                'HAMAS': '🇵🇸',
+                'HZB': '🇱🇧',
+                'MARINES': '🇺🇸',
+                'MARINZ': '🇺🇸',
+                'USMC': '🇺🇸',
+                'USSF': '🇺🇸',
+                'BRITISH': '🇬🇧',
+                'IDF': '🇮🇱',
+                'CANADA': '🇨🇦',
+                'FRANCE': '🇫🇷',
+                'INSURGENTS': '⚔️',
+                'TALIBAN': '⚔️',
+                'KONNI GROUP': '🇷🇺',
+                'VALKYRIE': '🇺🇸',
+                'UKRAINE': '🇺🇦',
+                'IRAQ': '🇮🇶',
+                'SYRIA': '🇸🇾',
+                'FINLAND': '🇫🇮',
+                'TURKEY': '🇹🇷',
+                'SHADOW COMPANY': '🇺🇸'
+            };
+            return flags[teamName] || '⚔️';
+        }
+
+        // دالة إعادة تفعيل الأزرار
+        // دالة إرسال الإعلان
+        async function sendAnnouncement(formData) {
+            try {
+                // إنشاء البيانات للإعلان
+                const announcementData = {
+                    server: formData.get('server'),
+                    map: formData.get('map'),
+                    layer: formData.get('layer'),
+                    factions: formData.get('factions'),
+                    time: formData.get('time'),
+                    team1_name: formData.get('team1_name'),
+                    team2_name: formData.get('team2_name'),
+                    commander1: formData.get('commander1'),
+                    commander2: formData.get('commander2')
+                };
+
+                // إرسال البيانات للـ Vercel API
+                const response = await fetch(`${API_BASE_URL}/api/send-announcement`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(announcementData)
+                });
+
+                if (response.ok) {
+                    showMessage('✅ تم إرسال الإعلان بنجاح!', 'success');
+                } else {
+                    const errorText = await response.text();
+                    showMessage(`❌ خطأ في إرسال الإعلان: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('خطأ في إرسال الإعلان:', error);
+                showMessage('❌ خطأ في الاتصال. تأكد من أن الموقع متصل بالإنترنت.', 'error');
+            }
+        }
+
+        async function reactivateButtons() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/reactivate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage('✅ تم إعادة تفعيل الأزرار بنجاح!', 'success');
+                } else {
+                    const errorText = await response.text();
+                    showMessage(`❌ خطأ في إعادة تفعيل الأزرار: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('خطأ في إعادة تفعيل الأزرار:', error);
+                showMessage('❌ خطأ في الاتصال. تأكد من أن الموقع متصل بالإنترنت.', 'error');
+            }
+        }
+
+        // دالة تعيين الفائز
+        async function setWinner() {
+            try {
+                const messageId = document.getElementById('messageId').value;
+                const winnerName = document.getElementById('winnerName').value;
+
+                if (!messageId || !winnerName) {
+                    showMessage('❌ يرجى ملء جميع الحقول المطلوبة', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/set-winner`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messageId: messageId,
+                        winner: winnerName
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('✅ تم تعيين الفائز بنجاح!', 'success');
+                    document.getElementById('messageId').value = '';
+                    document.getElementById('winnerName').value = '';
+                } else {
+                    const errorText = await response.text();
+                    showMessage(`❌ خطأ في تعيين الفائز: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                console.error('خطأ في تعيين الفائز:', error);
+                showMessage('❌ خطأ في الاتصال. تأكد من أن الموقع متصل بالإنترنت.', 'error');
+            }
+        }
+
+        // دالة تعديل الإعلان
+        async function editAnnouncement() {
+            showMessage('⚠️ هذه الوظيفة تتطلب البوت ليعمل محلياً', 'error');
+        }
+
+        // إخفاء المحتوى الرئيسي عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('passwordInput').focus();
+        });
+    </script>
+</body>
+</html>
