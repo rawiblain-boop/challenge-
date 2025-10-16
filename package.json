@@ -6,7 +6,7 @@
   },
   "dependencies": {},
   "scripts": {
-    "build": "echo 'No build step required'",
+    "build": "echo 'Static site - no build needed'",
     "start": "echo 'Static site'"
   }
 }
