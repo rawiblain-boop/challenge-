@@ -1,5 +1,12 @@
 {
+  "name": "challenge-bot-website",
+  "version": "1.0.0",
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
+  },
+  "dependencies": {},
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "start": "echo 'Static site'"
   }
 }
